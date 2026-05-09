@@ -15,13 +15,20 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Cargar variables de entorno (.env)
 dotenv.config();
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
+app.use(express.static(PROJECT_ROOT));
 
 // Puerto de ejecución (8787 por defecto)
 const PORT = process.env.PORT || 8787;
@@ -29,8 +36,8 @@ const PORT = process.env.PORT || 8787;
 // Configuración de proveedores IA
 // Proveedor 1: Google AI Studio (Gemma oficial)
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMMA_API_KEY;
-const GOOGLE_MODEL = process.env.GOOGLE_MODEL || "gemma-4-31b-it";
-const GOOGLE_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_MODEL}:generateContent`;
+const GOOGLE_MODEL = process.env.GOOGLE_MODEL || "gemini-2.5-flash";
+const GOOGLE_FALLBACK_MODEL = process.env.GOOGLE_FALLBACK_MODEL || "gemma-4-31b-it";
 
 // Proveedor 2: OpenRouter (Fallback gratuito)
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
@@ -92,7 +99,9 @@ app.post("/analyze", async (req, res) => {
     // Paso 3: Combinar resultados
     return res.json({
       provider: llm.provider,
-      issues: [...ruleIssues, ...(llm.issues || [])],
+      model: llm.model,
+      provider_errors: llm.provider_errors || [],
+      issues: dedupeIssues([...ruleIssues, ...(llm.issues || [])]),
       simplified_content: llm.simplified_content || [],
       navigation_steps: llm.navigation_steps || [],
       confidence: llm.confidence ?? 0.5
@@ -131,14 +140,19 @@ async function askGemmaWithFallback(page, ruleIssues) {
     };
   }
   const prompt = buildPrompt(page, ruleIssues);
+  const providerErrors = [];
 
   // Intenta Google AI Studio
   if (GOOGLE_API_KEY) {
-    try {
-      const google = await callGoogleGemma(prompt);
-      return { provider: "google", ...google };
-    } catch (error) {
-      console.warn("[Fallback] Google failed:", error.message);
+    const googleModels = [...new Set([GOOGLE_MODEL, GOOGLE_FALLBACK_MODEL].filter(Boolean))];
+    for (const model of googleModels) {
+      try {
+        const google = await callGoogleModel(prompt, model);
+        return { provider: "google", model, ...google };
+      } catch (error) {
+        providerErrors.push(`Google (${model}): ${sanitizeProviderError(error.message)}`);
+        console.warn(`[Fallback] Google ${model} failed:`, error.message);
+      }
     }
   }
 
@@ -148,18 +162,29 @@ async function askGemmaWithFallback(page, ruleIssues) {
       const openRouter = await callOpenRouterGemma(prompt);
       return { provider: "openrouter", ...openRouter };
     } catch (error) {
+      providerErrors.push(`OpenRouter (${OPENROUTER_MODEL}): ${sanitizeProviderError(error.message)}`);
       console.warn("[Fallback] OpenRouter failed:", error.message);
     }
   }
 
   // Si ambos fallan, retorna respuesta sin IA
+  const hasConfiguredProvider = Boolean(GOOGLE_API_KEY || OPENROUTER_API_KEY);
   return {
     provider: "none",
+    provider_errors: providerErrors,
     issues: [],
     simplified_content: [],
-    navigation_steps: ["Configura GOOGLE_API_KEY o OPENROUTER_API_KEY para habilitar IA."],
+    navigation_steps: [
+      hasConfiguredProvider
+        ? `La IA está configurada, pero falló la llamada al proveedor. ${providerErrors.join(" | ")}`
+        : "Configura GOOGLE_API_KEY o OPENROUTER_API_KEY para habilitar IA."
+    ],
     confidence: 0.1
   };
+}
+
+function sanitizeProviderError(message) {
+  return String(message || "Unknown provider error").replace(/key=[^&\s]+/gi, "key=<hidden>");
 }
 
 /**
@@ -193,8 +218,9 @@ Rules:
 `;
 }
 
-async function callGoogleGemma(prompt) {
-  const response = await fetch(`${GOOGLE_ENDPOINT}?key=${GOOGLE_API_KEY}`, {
+async function callGoogleModel(prompt, model) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const response = await fetch(`${endpoint}?key=${GOOGLE_API_KEY}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -278,6 +304,20 @@ function normalizeOutput(output) {
     navigation_steps: Array.isArray(output.navigation_steps) ? output.navigation_steps : [],
     confidence: typeof output.confidence === "number" ? output.confidence : 0.5
   };
+}
+
+function dedupeIssues(issues) {
+  const seen = new Set();
+  return issues.filter((issue) => {
+    const key = [
+      issue?.severity || "",
+      issue?.problem || "",
+      issue?.fix || ""
+    ].join("|").toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 async function safeText(response) {

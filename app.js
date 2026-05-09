@@ -118,6 +118,7 @@ form.addEventListener("submit", async (event) => {
     if (!response.ok) throw new Error(data.error || "Error del servidor");
 
     providerValue.textContent = data.provider || "none";
+    if (data.model) providerValue.textContent += ` (${data.model})`;
     renderIssues(data.issues || []);
     renderSimplified(data.simplified_content || []);
     renderSteps(data.navigation_steps || []);
@@ -147,7 +148,7 @@ async function analyzeDirectWithGemma(page) {
   const prompt = buildGemmaPrompt(page, ruleIssues);
 
   if (provider === "google") {
-    const model = "gemma-4-31b-it";
+    const model = "gemini-2.5-flash";
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
     const response = await fetch(endpoint, {
       method: "POST",

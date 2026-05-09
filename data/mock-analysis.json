@@ -1,31 +1,4 @@
 {
-  "title": "Checkout",
-  "headings": [],
-  "paragraphs": [
-    "Click aqui para continuar con la compra y completar todos los pasos en una sola pantalla con mucha informacion.",
-    "Si tienes dudas, revisa los terminos y condiciones antes de enviar."
-  ],
-  "links": [
-    {
-      "text": "Click aqui",
-      "href": "/next"
-    }
-  ],
-  "images": [
-    {
-      "src": "/banner.png",
-      "alt": ""
-    }
-  ],
-  "forms": [
-    {
-      "id": "email",
-      "name": "email",
-      "label": ""
-    }
-  ]
-}
-{
   "page": {
     "title": "Checkout - Mi Tienda Online",
     "headings": ["Carrito de Compras"],

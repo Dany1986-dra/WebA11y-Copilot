@@ -148,6 +148,16 @@ async function runTests() {
     test("Respuesta válida", health.body && health.body.ok === true);
     test("Provider field", "providerConfigured" in health.body);
 
+    // Test 1b: Static frontend assets
+    console.log("\n📋 Test 1b: Frontend estático");
+    const home = await makeRequest("GET", "/");
+    test("Home status 200", home.statusCode === 200);
+    test("Home entrega HTML", typeof home.body === "string" && home.body.includes("WebA11y Copilot"));
+
+    const mock = await makeRequest("GET", "/data/mock-analysis.json");
+    test("Mock status 200", mock.statusCode === 200);
+    test("Mock JSON válido", mock.body && mock.body.page && Array.isArray(mock.body.page.links));
+
     // Test 2: Missing page payload
     console.log("\n📋 Test 2: POST /analyze - Sin payload");
     const nopayload = await makeRequest("POST", "/analyze", {});
