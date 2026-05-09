@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="weba11y-backend-url" content="">
+  <title>WebA11y Copilot - Auditor de Accesibilidad</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a href="#main" class="skip-link">Ir al contenido principal</a>
+
+  <main id="main">
+    <header>
+      <h1>♿ WebA11y Copilot</h1>
+      <p>Auditor inteligente de accesibilidad web con Gemma 4 31B</p>
+      <p>Pega el JSON de tu página para detectar problemas WCAG, simplificar contenido y obtener guías de navegación.</p>
+    </header>
+
+    <form id="analyze-form">
+      <fieldset class="api-config">
+        <legend>Configuracion IA (modo GitHub Pages)</legend>
+        <label for="provider">Proveedor</label>
+        <select id="provider">
+          <option value="openrouter">OpenRouter (recomendado)</option>
+          <option value="google">Google AI Studio</option>
+        </select>
+
+        <label for="api-key">API Key</label>
+        <input id="api-key" type="password" placeholder="Pega tu API key para usar Gemma desde el navegador">
+      </fieldset>
+
+      <label for="page-json">JSON de la página web:</label>
+      <textarea 
+        id="page-json" 
+        aria-describedby="json-help json-error"
+        placeholder='Ejemplo:
+{
+  "title": "Mi Página",
+  "headings": ["Título Principal"],
+  "paragraphs": ["Párrafo de contenido"],
+  "links": [{"text": "Ir a Google", "href": "https://google.com"}],
+  "images": [{"src": "imagen.jpg", "alt": "Descripción"}],
+  "forms": [{"name": "email", "label": "Correo"}]
+}'
+      ></textarea>
+      
+      <div id="json-help" style="color: #999; font-size: 0.9em; margin-top: 8px;">
+        Campos requeridos: title, headings, paragraphs, links, images, forms (todos arrays)
+      </div>
+      <div id="json-error"></div>
+
+      <div class="buttons">
+        <button type="submit">🔍 Analizar</button>
+        <button type="button" id="load-mock-btn">📋 Cargar ejemplo</button>
+      </div>
+    </form>
+
+    <div id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="results">
+      <div class="provider-info">
+        <strong>Proveedor IA:</strong> <span id="provider-value">-</span>
+      </div>
+
+      <div class="result-section">
+        <h2>🚨 Problemas Detectados</h2>
+        <ul id="issues-list" role="region" aria-label="Problemas de accesibilidad">
+          <li class="empty-state">Los problemas aparecerán aquí después del análisis</li>
+        </ul>
+      </div>
+
+      <div class="result-section">
+        <h2>📝 Contenido Simplificado</h2>
+        <ul id="simplified-list" role="region" aria-label="Contenido simplificado">
+          <li class="empty-state">Contenido simplificado aparecerá aquí</li>
+        </ul>
+      </div>
+
+      <div class="result-section">
+        <h2>🗺️ Pasos de Navegación</h2>
+        <ul id="steps-list" role="region" aria-label="Guía de navegación">
+          <li class="empty-state">Pasos de navegación aparecerán aquí</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+  <footer class="footer" aria-label="Información del sitio">
+    <div class="footer-content">
+      <p class="footer-brand">♿ WebA11y Copilot</p>
+      <p class="footer-meta">&copy; 2026 · Daniel Rivera Alpízar · Accesibilidad Web con Gemma 4</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

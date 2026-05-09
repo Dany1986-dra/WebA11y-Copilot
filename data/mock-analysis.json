@@ -1,0 +1,79 @@
+{
+  "title": "Checkout",
+  "headings": [],
+  "paragraphs": [
+    "Click aqui para continuar con la compra y completar todos los pasos en una sola pantalla con mucha informacion.",
+    "Si tienes dudas, revisa los terminos y condiciones antes de enviar."
+  ],
+  "links": [
+    {
+      "text": "Click aqui",
+      "href": "/next"
+    }
+  ],
+  "images": [
+    {
+      "src": "/banner.png",
+      "alt": ""
+    }
+  ],
+  "forms": [
+    {
+      "id": "email",
+      "name": "email",
+      "label": ""
+    }
+  ]
+}
+{
+  "page": {
+    "title": "Checkout - Mi Tienda Online",
+    "headings": ["Carrito de Compras"],
+    "paragraphs": [
+      "Tu carrito contiene 3 productos",
+      "Subtotal: $99.99",
+      "Envío calculado en checkout",
+      "Esta es una página de ejemplo para probar el auditor de accesibilidad"
+    ],
+    "links": [
+      {
+        "text": "Continuar comprando",
+        "href": "/products"
+      },
+      {
+        "text": "Haz clic aquí",
+        "href": "/help"
+      },
+      {
+        "text": "Política de privacidad",
+        "href": "/privacy"
+      }
+    ],
+    "images": [
+      {
+        "src": "/img/product1.jpg",
+        "alt": "Laptop Dell XPS 13"
+      },
+      {
+        "src": "/img/product2.jpg"
+      },
+      {
+        "src": "/img/decorative-banner.jpg",
+        "alt": ""
+      }
+    ],
+    "forms": [
+      {
+        "name": "email",
+        "label": "Correo Electrónico"
+      },
+      {
+        "name": "card-number"
+      },
+      {
+        "name": "address",
+        "label": "Dirección de Envío"
+      }
+    ]
+  }
+}

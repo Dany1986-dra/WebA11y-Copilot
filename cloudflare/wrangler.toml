@@ -1,0 +1,7 @@
+name = "weba11y-backend"
+main = "worker.js"
+compatibility_date = "2026-05-09"
+
+[vars]
+GOOGLE_MODEL = "gemma-4-31b-it"
+OPENROUTER_MODEL = "google/gemma-4-31b-it:free"

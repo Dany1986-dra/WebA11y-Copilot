@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: weba11y-backend
+    runtime: node
+    plan: free
+    rootDir: .
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 10000
+      - key: GOOGLE_MODEL
+        value: gemma-4-31b-it
+      - key: OPENROUTER_MODEL
+        value: google/gemma-4-31b-it:free
